@@ -19,14 +19,8 @@ if 'query_tokens' not in st.session_state:
 if 'response_tokens' not in st.session_state:
     st.session_state.response_tokens = 0
 
-# Set your Google API key
-def _set_env(var: str):
-    if not os.environ.get(var):
-        import getpass
-        os.environ[var] = getpass.getpass(f"{var}: ")
-
-_set_env("GEMINI_API_KEY")
-api_key = os.environ.get("GEMINI_API_KEY")
+# Get API key from Streamlit secrets
+api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
 
 # Initialize the Gemini model
