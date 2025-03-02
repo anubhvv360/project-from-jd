@@ -19,6 +19,30 @@ if 'query_tokens' not in st.session_state:
 if 'response_tokens' not in st.session_state:
     st.session_state.response_tokens = 0
 
+# Initialize state variables for tracking generated content
+if 'has_generated_projects' not in st.session_state:
+    st.session_state.has_generated_projects = False
+if 'has_generated_backstories' not in st.session_state:
+    st.session_state.has_generated_backstories = False
+if 'has_generated_resources' not in st.session_state:
+    st.session_state.has_generated_resources = False
+if 'industry' not in st.session_state:
+    st.session_state.industry = ""
+if 'domain' not in st.session_state:
+    st.session_state.domain = ""
+if 'seniority' not in st.session_state:
+    st.session_state.seniority = ""
+if 'projects' not in st.session_state:
+    st.session_state.projects = ""
+if 'backstories' not in st.session_state:
+    st.session_state.backstories = ""
+if 'learning_resources' not in st.session_state:
+    st.session_state.learning_resources = ""
+if 'job_description' not in st.session_state:
+    st.session_state.job_description = ""
+if 'company_name' not in st.session_state:
+    st.session_state.company_name = ""
+
 # Get API key from Streamlit secrets
 api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
@@ -313,29 +337,7 @@ if st.button("Generate Resume Projects") and job_description_input:
             
             # Force a rerun to show the results and new buttons
             st.experimental_rerun()
-# Initialize state variables for tracking generated content
-if 'has_generated_projects' not in st.session_state:
-    st.session_state.has_generated_projects = False
-if 'has_generated_backstories' not in st.session_state:
-    st.session_state.has_generated_backstories = False
-if 'has_generated_resources' not in st.session_state:
-    st.session_state.has_generated_resources = False
-if 'industry' not in st.session_state:
-    st.session_state.industry = ""
-if 'domain' not in st.session_state:
-    st.session_state.domain = ""
-if 'seniority' not in st.session_state:
-    st.session_state.seniority = ""
-if 'projects' not in st.session_state:
-    st.session_state.projects = ""
-if 'backstories' not in st.session_state:
-    st.session_state.backstories = ""
-if 'learning_resources' not in st.session_state:
-    st.session_state.learning_resources = ""
-if 'job_description' not in st.session_state:
-    st.session_state.job_description = ""
-if 'company_name' not in st.session_state:
-    st.session_state.company_name = ""
+
 # Display results if projects have been generated
 if st.session_state.has_generated_projects:
     st.success("Projects Generated Successfully!")
