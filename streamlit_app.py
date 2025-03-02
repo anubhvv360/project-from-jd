@@ -19,30 +19,6 @@ if 'query_tokens' not in st.session_state:
 if 'response_tokens' not in st.session_state:
     st.session_state.response_tokens = 0
 
-# Initialize state variables for tracking generated content
-if 'has_generated_projects' not in st.session_state:
-    st.session_state.has_generated_projects = False
-if 'has_generated_backstories' not in st.session_state:
-    st.session_state.has_generated_backstories = False
-if 'has_generated_resources' not in st.session_state:
-    st.session_state.has_generated_resources = False
-if 'industry' not in st.session_state:
-    st.session_state.industry = ""
-if 'domain' not in st.session_state:
-    st.session_state.domain = ""
-if 'seniority' not in st.session_state:
-    st.session_state.seniority = ""
-if 'projects' not in st.session_state:
-    st.session_state.projects = ""
-if 'backstories' not in st.session_state:
-    st.session_state.backstories = ""
-if 'learning_resources' not in st.session_state:
-    st.session_state.learning_resources = ""
-if 'job_description' not in st.session_state:
-    st.session_state.job_description = ""
-if 'company_name' not in st.session_state:
-    st.session_state.company_name = ""
-
 # Get API key from Streamlit secrets
 api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
@@ -189,7 +165,29 @@ Create the following sections:
 
 Format your response with clear headings and bullet points. Be specific and practical in your recommendations. Focus on quality resources that would genuinely help someone prepare for this role.
 """
-
+# Initialize state variables for tracking generated content
+if 'has_generated_projects' not in st.session_state:
+    st.session_state.has_generated_projects = False
+if 'has_generated_backstories' not in st.session_state:
+    st.session_state.has_generated_backstories = False
+if 'has_generated_resources' not in st.session_state:
+    st.session_state.has_generated_resources = False
+if 'industry' not in st.session_state:
+    st.session_state.industry = ""
+if 'domain' not in st.session_state:
+    st.session_state.domain = ""
+if 'seniority' not in st.session_state:
+    st.session_state.seniority = ""
+if 'projects' not in st.session_state:
+    st.session_state.projects = ""
+if 'backstories' not in st.session_state:
+    st.session_state.backstories = ""
+if 'learning_resources' not in st.session_state:
+    st.session_state.learning_resources = ""
+if 'job_description' not in st.session_state:
+    st.session_state.job_description = ""
+if 'company_name' not in st.session_state:
+    st.session_state.company_name = ""
 # Initialize prompt templates
 job_analysis_prompt = PromptTemplate(
     input_variables=["company_name", "job_description"],
