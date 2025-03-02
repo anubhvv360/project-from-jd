@@ -39,6 +39,7 @@ Analyze the following job description for a role at {company_name} and extract:
 1. The specific industry (e.g., Retail, Healthcare, Technology)
 2. The specific domain within that industry (e.g., Data Science in Technology, Supply Chain in Retail)
 3. Consider the company's {company_name} specialization and focus areas when determining the industry and domain.
+4. Determine the seniority level of the role (Entry-level, Mid-level, Senior, Executive)
 
 Focus on the job requirements, responsibilities, and company information. Ignore general information like DEI statements, benefits, and other standard corporate language that doesn't help determine the specific industry and domain.
 
@@ -47,6 +48,7 @@ If provided, use information about {company_name} to refine your analysis.
 Format your response exactly like this:
 Industry: [Industry Name]
 Domain: [Domain Name]
+Seniority: [Seniority Level]
 
 Job Description:
 {job_description}
@@ -101,7 +103,7 @@ job_analysis_prompt = PromptTemplate(
 )
 
 project_generation_prompt = PromptTemplate(
-    input_variables=["industry", "domain", "company_name", "job_description"],
+    input_variables=["industry", "domain", "company_name", "job_description", "seniority"],
     template=project_generation_template
 )
 
@@ -116,17 +118,19 @@ def analyze_job_description(job_description, company_name):
     
     industry = industry_match.group(1).strip() if industry_match else "Unknown"
     domain = domain_match.group(1).strip() if domain_match else "Unknown"
+    seniority = seniority_match.group(1).strip() if seniority_match else "Mid-level"
     
-    return industry, domain
+    return industry, domain, seniority
 
-def generate_projects(industry, domain, job_description, company_name):
+def generate_projects(industry, domain, job_description, company_name, seniority):
     llm = get_llm()
     chain = LLMChain(prompt=project_generation_prompt, llm=llm)
     projects = chain.run(
         industry=industry, 
         domain=domain, 
         job_description=job_description,
-        company_name=company_name
+        company_name=company_name,
+        seniority=seniority
     )
     return projects
 
@@ -141,7 +145,7 @@ st.set_page_config(
 st.title("Resume Project Generator from Job Descriptions")
 st.markdown("""
 This tool analyzes job descriptions and generates tailored project ideas for your resume. 
-Simply paste a job description, enter the company name, and we'll suggest industry-specific projects that showcase your expertise.
+Simply paste a job description, enter the company name, and get suggested industry-specific projects that showcase your expertise.
 """)
 
 # Company name input
@@ -170,11 +174,11 @@ if st.button("Generate Resume Projects") and job_description:
         query_tokens = len(job_description) // 4
         
         # Analyze the job description
-        industry, domain = analyze_job_description(job_description, company_name)
+        industry, domain, seniority = analyze_job_description(job_description, company_name)
         
         # Generate project suggestions
         with st.spinner(f"Generating project ideas for {industry} - {domain}..."):
-            projects = generate_projects(industry, domain, job_description, company_name)
+            projects = generate_projects(industry, domain, job_description, company_name, seniority)
             
             # Approximate response tokens
             response_tokens = len(projects) // 4
