@@ -218,12 +218,12 @@ SENIORITY LEVEL: {seniority}
 {projects}
 
 """
-st.download_button(
-label="Download Results",
-data=result_text,
-file_name=f"resume_projects_{company_name.replace(' ', '_')}.txt",
-mime="text/plain",
-)
+    st.download_button(
+        label="Download Results",
+        data=result_text,
+        file_name=f"resume_projects_{company_name.replace(' ', '_')}.txt",
+        mime="text/plain",
+    )
 
 # Display token usage in sidebar
 st.sidebar.title("Usage Statistics")
