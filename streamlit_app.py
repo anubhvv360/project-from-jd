@@ -206,8 +206,8 @@ if st.button("Generate Resume Projects") and job_description:
             st.session_state.tokens_consumed += (query_tokens + response_tokens)
 
 # Download button for the results
- if 'projects' in locals():
-result_text = f"""
+if 'projects' in locals():
+    result_text = f"""
 RESUME PROJECTS FOR {company_name}
 
 INDUSTRY: {industry}
