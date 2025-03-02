@@ -73,7 +73,7 @@ Analyze the job description below for any specific skills, tools, or frameworks 
 
 Your response must be formatted in Markdown EXACTLY as follows:
 
-### Project 1: [Specific Project Title]
+### [Specific Project Title]
 * [Business impact with specific metrics with **key terms bolded**]
 * [Specific action/methodology with domain-specific details with **key terms bolded**]
 * [Specific action/methodology with domain-specific details with **key terms bolded**]
