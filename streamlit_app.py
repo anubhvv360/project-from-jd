@@ -19,6 +19,30 @@ if 'query_tokens' not in st.session_state:
 if 'response_tokens' not in st.session_state:
     st.session_state.response_tokens = 0
 
+# Initialize session state variables for project data
+if 'job_description' not in st.session_state:
+    st.session_state.job_description = ""
+if 'company_name' not in st.session_state:
+    st.session_state.company_name = ""
+if 'industry' not in st.session_state:
+    st.session_state.industry = ""
+if 'domain' not in st.session_state:
+    st.session_state.domain = ""
+if 'seniority' not in st.session_state:
+    st.session_state.seniority = ""
+if 'projects' not in st.session_state:
+    st.session_state.projects = ""
+if 'backstories' not in st.session_state:
+    st.session_state.backstories = ""
+if 'learning_resources' not in st.session_state:
+    st.session_state.learning_resources = ""
+if 'projects_generated' not in st.session_state:
+    st.session_state.projects_generated = False
+if 'backstories_generated' not in st.session_state:
+    st.session_state.backstories_generated = False
+if 'learning_resources_generated' not in st.session_state:
+    st.session_state.learning_resources_generated = False
+
 # Get API key from Streamlit secrets
 api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
@@ -255,25 +279,29 @@ Simply paste a job description, enter the company name, and get industry-specifi
 """)
 
 # Company name input
-company_name = st.text_input("Enter the company name:", "")
+company_name = st.text_input("Enter the company name:", value=st.session_state.company_name)
+st.session_state.company_name = company_name
 
 # Input options
 input_option = st.radio("Select input method:", ["Paste Job Description", "Upload File"])
 
 job_description = ""
 if input_option == "Paste Job Description":
-    job_description = st.text_area("Paste the job description here:", height=300)
+    job_description = st.text_area("Paste the job description here:", height=300, value=st.session_state.job_description if st.session_state.job_description else "")
+    st.session_state.job_description = job_description
 else:
     uploaded_file = st.file_uploader("Upload job description file (TXT only)", type=["txt"])
     if uploaded_file is not None:
         job_description = uploaded_file.read().decode("utf-8")
         st.text_area("File Content (First 500 chars):", job_description[:500] + "...", height=200)
+        st.session_state.job_description = job_description
 
-# Process button
+# Process button for generating projects
 if st.button("Generate Resume Projects") and job_description:
     if not company_name:
         st.warning("Please enter a company name for better results.")
         company_name = "Unknown Company"
+        st.session_state.company_name = company_name
     
     with st.spinner("Analyzing job description..."):
         # Get token count for query (approximate)
@@ -281,24 +309,26 @@ if st.button("Generate Resume Projects") and job_description:
         
         # Analyze the job description
         industry, domain, seniority = analyze_job_description(job_description, company_name)
+        st.session_state.industry = industry
+        st.session_state.domain = domain
+        st.session_state.seniority = seniority
         
         # Generate project suggestions
         with st.spinner(f"Generating project ideas for {industry} - {domain}..."):
             projects = generate_projects(industry, domain, job_description, company_name, seniority)
-            
-            # Generate backstories
-            with st.spinner("Creating project backstories..."):
-                backstories = generate_backstories(industry, domain, company_name, projects, seniority)
-            
-            # Generate learning resources
-            with st.spinner("Compiling learning resources..."):
-                learning_resources = generate_learning_resources(industry, domain, company_name, projects, job_description, seniority)
+            st.session_state.projects = projects
+            st.session_state.projects_generated = True
             
             # Approximate response tokens
-            response_tokens = (len(projects) + len(backstories) + len(learning_resources)) // 4
+            response_tokens = len(projects) // 4
+            
+            # Update token counts
+            st.session_state.query_tokens += query_tokens
+            st.session_state.response_tokens += response_tokens
+            st.session_state.tokens_consumed += (query_tokens + response_tokens)
             
             # Display results
-            st.success("Analysis Complete!")
+            st.success("Projects Generated Successfully!")
             
             col1, col2 = st.columns([1, 3])
             
@@ -312,14 +342,58 @@ if st.button("Generate Resume Projects") and job_description:
             with col2:
                 st.subheader("Suggested Resume Projects")
                 st.markdown(projects)
+
+# Display generate backstories button only if projects have been generated
+if st.session_state.projects_generated and not st.session_state.backstories_generated:
+    # Download button for the projects
+    result_text = f"""
+RESUME PROJECTS FOR {st.session_state.company_name}
+
+INDUSTRY: {st.session_state.industry}
+DOMAIN: {st.session_state.domain}
+SENIORITY LEVEL: {st.session_state.seniority}
+
+# SUGGESTED PROJECTS
+{st.session_state.projects}
+    """
+    st.download_button(
+        label="Download Projects",
+        data=result_text,
+        file_name=f"resume_projects_{st.session_state.company_name.replace(' ', '_')}.txt",
+        mime="text/plain",
+    )
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("Generate Project Backstories"):
+            st.warning("⚠️ Warning: Generating backstories may take longer and could fail due to computational limitations. We recommend saving your projects data before proceeding.")
+            
+            with st.spinner("Creating project backstories..."):
+                backstories = generate_backstories(
+                    st.session_state.industry, 
+                    st.session_state.domain, 
+                    st.session_state.company_name, 
+                    st.session_state.projects, 
+                    st.session_state.seniority
+                )
+                st.session_state.backstories = backstories
+                st.session_state.backstories_generated = True
+                
+                # Approximate response tokens
+                response_tokens = len(backstories) // 4
+                st.session_state.response_tokens += response_tokens
+                st.session_state.tokens_consumed += response_tokens
                 
                 # Extract project titles for backstory dropdowns
-                project_titles = re.findall(r'### Project \d+: (.*?)$', projects, re.MULTILINE)
+                project_titles = re.findall(r'### Project \d+: (.*?)$', st.session_state.projects, re.MULTILINE)
                 if not project_titles:  # Try alternative pattern if first one doesn't match
-                    project_titles = re.findall(r'### (.*?)$', projects, re.MULTILINE)
+                    project_titles = re.findall(r'### (.*?)$', st.session_state.projects, re.MULTILINE)
                 
                 # Split backstories by project
                 backstory_sections = backstories.split("PROJECT BACKSTORY:")[1:]  # Skip the first empty split
+                
+                st.success("Backstories Generated Successfully!")
                 
                 if len(project_titles) == len(backstory_sections):
                     for i, (title, backstory) in enumerate(zip(project_titles, backstory_sections)):
@@ -329,46 +403,241 @@ if st.button("Generate Resume Projects") and job_description:
                     # Fallback if parsing failed
                     with st.expander("📋 Project Backstories"):
                         st.markdown(backstories)
+    
+    with col2:
+        if st.button("Generate Learning Resources"):
+            st.warning("⚠️ Warning: Generating learning resources may take longer and could fail due to computational limitations. We recommend saving your projects data before proceeding.")
+            
+            with st.spinner("Compiling learning resources..."):
+                learning_resources = generate_learning_resources(
+                    st.session_state.industry, 
+                    st.session_state.domain, 
+                    st.session_state.company_name, 
+                    st.session_state.projects, 
+                    st.session_state.job_description,
+                    st.session_state.seniority
+                )
+                st.session_state.learning_resources = learning_resources
+                st.session_state.learning_resources_generated = True
+                
+                # Approximate response tokens
+                response_tokens = len(learning_resources) // 4
+                st.session_state.response_tokens += response_tokens
+                st.session_state.tokens_consumed += response_tokens
+                
+                st.success("Learning Resources Generated Successfully!")
                 
                 # Learning Resources Section
                 st.subheader("Learning Repository")
                 st.markdown(learning_resources)
-            
-            # Update token counts
-            st.session_state.query_tokens += query_tokens
-            st.session_state.response_tokens += response_tokens
-            st.session_state.tokens_consumed += (query_tokens + response_tokens)
 
-# Download button for the results
-if 'projects' in locals() and 'backstories' in locals() and 'learning_resources' in locals():
+# If backstories have been generated but not learning resources
+elif st.session_state.backstories_generated and not st.session_state.learning_resources_generated:
+    # Download button for the projects and backstories
     result_text = f"""
-RESUME PROJECTS FOR {company_name}
+RESUME PROJECTS FOR {st.session_state.company_name}
 
-INDUSTRY: {industry}
-DOMAIN: {domain}
-SENIORITY LEVEL: {seniority}
+INDUSTRY: {st.session_state.industry}
+DOMAIN: {st.session_state.domain}
+SENIORITY LEVEL: {st.session_state.seniority}
 
 # SUGGESTED PROJECTS
-{projects}
+{st.session_state.projects}
 
 # PROJECT BACKSTORIES
-{backstories}
-
-# LEARNING REPOSITORY
-{learning_resources}
+{st.session_state.backstories}
     """
     st.download_button(
-        label="Download Results",
+        label="Download Projects and Backstories",
         data=result_text,
-        file_name=f"resume_projects_{company_name.replace(' ', '_')}.txt",
+        file_name=f"resume_projects_backstories_{st.session_state.company_name.replace(' ', '_')}.txt",
         mime="text/plain",
     )
+    
+    # Display backstories if they were previously generated
+    project_titles = re.findall(r'### Project \d+: (.*?)$', st.session_state.projects, re.MULTILINE)
+    if not project_titles:
+        project_titles = re.findall(r'### (.*?)$', st.session_state.projects, re.MULTILINE)
+    
+    backstory_sections = st.session_state.backstories.split("PROJECT BACKSTORY:")[1:]
+    
+    st.subheader("Project Backstories")
+    if len(project_titles) == len(backstory_sections):
+        for i, (title, backstory) in enumerate(zip(project_titles, backstory_sections)):
+            with st.expander(f"📋 Project Backstory: {title}"):
+                st.markdown(f"PROJECT BACKSTORY:{backstory}")
+    else:
+        with st.expander("📋 Project Backstories"):
+            st.markdown(st.session_state.backstories)
+    
+    if st.button("Generate Learning Resources"):
+        st.warning("⚠️ Warning: Generating learning resources may take longer and could fail due to computational limitations. We recommend saving your backstories data before proceeding.")
+        
+        with st.spinner("Compiling learning resources..."):
+            learning_resources = generate_learning_resources(
+                st.session_state.industry, 
+                st.session_state.domain, 
+                st.session_state.company_name, 
+                st.session_state.projects, 
+                st.session_state.job_description,
+                st.session_state.seniority
+            )
+            st.session_state.learning_resources = learning_resources
+            st.session_state.learning_resources_generated = True
+            
+            # Approximate response tokens
+            response_tokens = len(learning_resources) // 4
+            st.session_state.response_tokens += response_tokens
+            st.session_state.tokens_consumed += response_tokens
+            
+            st.success("Learning Resources Generated Successfully!")
+            
+            # Learning Resources Section
+            st.subheader("Learning Repository")
+            st.markdown(learning_resources)
+
+# If learning resources have been generated but not backstories
+elif st.session_state.learning_resources_generated and not st.session_state.backstories_generated:
+    # Download button for the projects and learning resources
+    result_text = f"""
+RESUME PROJECTS FOR {st.session_state.company_name}
+
+INDUSTRY: {st.session_state.industry}
+DOMAIN: {st.session_state.domain}
+SENIORITY LEVEL: {st.session_state.seniority}
+
+# SUGGESTED PROJECTS
+{st.session_state.projects}
+
+# LEARNING REPOSITORY
+{st.session_state.learning_resources}
+    """
+    st.download_button(
+        label="Download Projects and Learning Resources",
+        data=result_text,
+        file_name=f"resume_projects_resources_{st.session_state.company_name.replace(' ', '_')}.txt",
+        mime="text/plain",
+    )
+    
+    # Display learning resources if they were previously generated
+    st.subheader("Learning Repository")
+    st.markdown(st.session_state.learning_resources)
+    
+    if st.button("Generate Project Backstories"):
+        st.warning("⚠️ Warning: Generating backstories may take longer and could fail due to computational limitations. We recommend saving your learning resources data before proceeding.")
+        
+        with st.spinner("Creating project backstories..."):
+            backstories = generate_backstories(
+                st.session_state.industry, 
+                st.session_state.domain, 
+                st.session_state.company_name, 
+                st.session_state.projects, 
+                st.session_state.seniority
+            )
+            st.session_state.backstories = backstories
+            st.session_state.backstories_generated = True
+            
+            # Approximate response tokens
+            response_tokens = len(backstories) // 4
+            st.session_state.response_tokens += response_tokens
+            st.session_state.tokens_consumed += response_tokens
+            
+            # Extract project titles for backstory dropdowns
+            project_titles = re.findall(r'### Project \d+: (.*?)$', st.session_state.projects, re.MULTILINE)
+            if not project_titles:
+                project_titles = re.findall(r'### (.*?)$', st.session_state.projects, re.MULTILINE)
+            
+            # Split backstories by project
+            backstory_sections = backstories.split("PROJECT BACKSTORY:")[1:]
+            
+            st.success("Backstories Generated Successfully!")
+            
+            if len(project_titles) == len(backstory_sections):
+                for i, (title, backstory) in enumerate(zip(project_titles, backstory_sections)):
+                    with st.expander(f"📋 Project Backstory: {title}"):
+                        st.markdown(f"PROJECT BACKSTORY:{backstory}")
+            else:
+                with st.expander("📋 Project Backstories"):
+                    st.markdown(backstories)
+
+# If both backstories and learning resources have been generated
+elif st.session_state.backstories_generated and st.session_state.learning_resources_generated:
+    # Download button for all results
+    result_text = f"""
+RESUME PROJECTS FOR {st.session_state.company_name}
+
+INDUSTRY: {st.session_state.industry}
+DOMAIN: {st.session_state.domain}
+SENIORITY LEVEL: {st.session_state.seniority}
+
+# SUGGESTED PROJECTS
+{st.session_state.projects}
+
+# PROJECT BACKSTORIES
+{st.session_state.backstories}
+
+# LEARNING REPOSITORY
+{st.session_state.learning_resources}
+    """
+    st.download_button(
+        label="Download All Results",
+        data=result_text,
+        file_name=f"complete_resume_package_{st.session_state.company_name.replace(' ', '_')}.txt",
+        mime="text/plain",
+    )
+    
+    # Display all generated content
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.subheader("Project Backstories")
+        project_titles = re.findall(r'### Project \d+: (.*?)$', st.session_state.projects, re.MULTILINE)
+        if not project_titles:
+            project_titles = re.findall(r'### (.*?)$', st.session_state.projects, re.MULTILINE)
+        
+        backstory_sections = st.session_state.backstories.split("PROJECT BACKSTORY:")[1:]
+        
+        if len(project_titles) == len(backstory_sections):
+            for i, (title, backstory) in enumerate(zip(project_titles, backstory_sections)):
+                with st.expander(f"📋 Project Backstory: {title}"):
+                    st.markdown(f"PROJECT BACKSTORY:{backstory}")
+        else:
+            with st.expander("📋 Project Backstories"):
+                st.markdown(st.session_state.backstories)
+    
+    with col2:
+        st.subheader("Learning Repository")
+        st.markdown(st.session_state.learning_resources)
 
 # Display token usage in sidebar
 st.sidebar.title("Usage Statistics")
 st.sidebar.write(f"Total Tokens Consumed: {st.session_state.tokens_consumed}")
 st.sidebar.write(f"Query Tokens: {st.session_state.query_tokens}")
 st.sidebar.write(f"Response Tokens: {st.session_state.response_tokens}")
+
+# Reset button to start over
+if st.sidebar.button("Start Over"):
+    # Reset all session state variables except token counters
+    st.session_state.job_description = ""
+    st.session_state.company_name = ""
+    st.session_state.industry = ""
+    st.session_state.domain = ""
+    st.session_state.seniority = ""
+    st.session_state.projects = ""
+    st.session_state.backstories = ""
+    st.session_state.learning_resources = ""
+    st.session_state.projects_generated = False
+    st.session_state.backstories_generated = False
+    st.session_state.learning_resources_generated = False
+    st.sidebar.success("Session reset successfully! You can start a new job analysis.")
+    st.experimental_rerun()
+
+# Reset token counts only when explicitly requested
+if st.sidebar.button("Reset Usage Counters"):
+    st.session_state.tokens_consumed = 0
+    st.session_state.query_tokens = 0
+    st.session_state.response_tokens = 0
+    st.sidebar.success("Counters reset successfully!")
 
 # Tips and guidelines
 st.sidebar.title("Tips for Best Results")
@@ -388,13 +657,6 @@ st.sidebar.markdown("""
 * Second bullet with **technical skills** used
 * Third bullet explaining the **methodology** applied
 """)
-
-# Reset token counts only when explicitly requested
-if st.sidebar.button("Reset Usage Counters"):
-    st.session_state.tokens_consumed = 0
-    st.session_state.query_tokens = 0
-    st.session_state.response_tokens = 0
-    st.sidebar.success("Counters reset successfully!")
 
 # Footer for Credits
 st.markdown("""---""")
