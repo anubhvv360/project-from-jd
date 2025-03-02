@@ -178,7 +178,7 @@ if st.button("Generate Resume Projects") and job_description:
         industry, domain, seniority = analyze_job_description(job_description, company_name)
         
         # Generate project suggestions
-        with st.spinner(f"Generating project ideas for {industry} - {domain}- {seniority}..."):
+        with st.spinner(f"Generating project ideas for {industry} - {domain} - {seniority}..."):
             projects = generate_projects(industry, domain, job_description, company_name, seniority)
             
             # Approximate response tokens
