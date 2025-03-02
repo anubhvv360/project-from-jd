@@ -56,7 +56,7 @@ Job Description:
 
 # Define the prompt for project generation
 project_generation_template = """
-You are an industry expert with deep knowledge of {industry} and specifically {domain}. The job is at {company_name}.
+You are an industry expert with deep knowledge of {industry} and specifically {domain}. The job is at {company_name} and the seniority level is {seniority}.
 
 Generate 3 impressive and highly specific professional projects that someone could list on their resume to demonstrate relevant experience for a role in {domain} within the {industry} industry, considering the company profile of {company_name}.
 
@@ -178,7 +178,7 @@ if st.button("Generate Resume Projects") and job_description:
         industry, domain, seniority = analyze_job_description(job_description, company_name)
         
         # Generate project suggestions
-        with st.spinner(f"Generating project ideas for {industry} - {domain}..."):
+        with st.spinner(f"Generating project ideas for {industry} - {domain}- {seniority}..."):
             projects = generate_projects(industry, domain, job_description, company_name, seniority)
             
             # Approximate response tokens
@@ -194,6 +194,7 @@ if st.button("Generate Resume Projects") and job_description:
                 st.markdown(f"**Company:** {company_name}")
                 st.markdown(f"**Industry:** {industry}")
                 st.markdown(f"**Domain:** {domain}")
+                st.markdown(f"**Seniority:** {seniority}")
             
             with col2:
                 st.subheader("Suggested Resume Projects")
