@@ -29,7 +29,7 @@ def get_llm():
         model="gemini-1.5-pro-latest",
         google_api_key=api_key,
         temperature=0.4,
-        max_tokens=8000
+        max_tokens=2000
     )
 
 # Define the prompt template for job description analysis
@@ -96,46 +96,36 @@ Your response must be formatted in Markdown EXACTLY as follows:
 CRITICAL: Ensure that each bullet point is on its own separate line with a proper markdown asterisk (*) at the beginning of each line. Do NOT use the bullet character (•).
 """
 
-# Define prompt for project backstories
+# Define prompt for project backstories - MODIFIED to be more concise
 project_backstory_template = """
 You are a career coach specializing in interview preparation for the {industry} industry and {domain} domain. 
 
-For the following project descriptions for a {seniority} level position at {company_name}, create detailed backstories that the candidate can use during interviews when questioned about their experience. 
+For the following project descriptions for a {seniority} level position at {company_name}, create concise backstories that the candidate can use during interviews when questioned about their experience. 
 
 The backstories should:
 1. Be appropriate for the {seniority} level role
 2. Include specific challenges faced and how they were overcome
-3. Provide realistic context about stakeholders, team dynamics, and decision-making processes
-4. Include technical details that demonstrate domain expertise
-5. Mention 2-3 specific questions that might be asked about this project in an interview, with suggested answers
+3. Mention 2 specific questions that might be asked about this project in an interview, with suggested answers
 
 Here are the projects:
 {projects}
 
 For each project, provide:
 
-PROJECT BACKSTORY: [2-3 paragraphs with context, challenges, and approach]
-
-KEY INTERVIEW POINTS:
-- [Point about your specific role]
-- [Point about challenges overcome]
-- [Point about collaboration/stakeholders]
-- [Point about technical decisions]
+PROJECT BACKSTORY: [2-3 short paragraphs with context, challenges, and approach - be concise]
 
 POTENTIAL INTERVIEW QUESTIONS AND ANSWERS:
 1. Q: [Specific question about the project]
    A: [Suggested answer with specific details]
-2. Q: [Specific question about challenges]
-   A: [Suggested answer with specific details]
-3. Q: [Specific question about outcomes/metrics]
+2. Q: [Specific question about challenges or outcomes]
    A: [Suggested answer with specific details]
 """
 
-# Define prompt for learning resources
+# Define prompt for learning resources - MODIFIED to remove sections
 learning_resources_template = """
 You are an expert career coach and learning specialist in the {industry} industry, specifically in the {domain} domain.
 
-Based on the job description and the following projects that were created for a {seniority} level role at {company_name}, create a comprehensive learning guide for someone preparing for this role.
+Based on the job description and the following projects that were created for a {seniority} level role at {company_name}, create a focused learning guide for someone preparing for this role.
 
 Projects:
 {projects}
@@ -152,19 +142,15 @@ Create the following sections:
 
 2. CORE INTERVIEW QUESTIONS:
    - List 5-7 technical interview questions specific to this role/domain
-   - Include 3-5 behavioral questions relevant to this role
    - Provide brief guidance on how to approach each question (1-2 sentences)
 
 3. RECOMMENDED LEARNING RESOURCES:
-   - 3-4 specific online courses from platforms like Coursera, edX, LinkedIn Learning, or Google Skillshop (with specific course names, not just platform names)
+   - 3-4 specific online courses from platforms like Coursera, edX, LinkedIn Learning, or Google Skillshop (with specific course names)
    - 2-3 YouTube channels or specific videos relevant to the skills needed
-   - 2-3 books or comprehensive articles that would help prepare for this role
-   - 2-3 industry blogs or newsletters to follow
 
 4. INTERVIEW PREPARATION WEBSITES:
    - List 3-5 specific websites that offer preparation resources for this role/industry
    - Briefly explain what each site offers (1 sentence)
-   - Include any domain-specific interview preparation resources (e.g., case interview prep for consulting)
 
 Format your response with clear headings and bullet points. Be specific and practical in your recommendations. Focus on quality resources that would genuinely help someone prepare for this role.
 """
