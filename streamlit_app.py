@@ -29,7 +29,7 @@ def get_llm():
         model="gemini-1.5-pro-latest",
         google_api_key=api_key,
         temperature=0.4,
-        max_tokens=2000
+        max_tokens=4000
     )
 
 # Define the prompt template for job description analysis
