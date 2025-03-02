@@ -115,6 +115,7 @@ def analyze_job_description(job_description, company_name):
     # Parse the result to extract industry and domain
     industry_match = re.search(r'Industry:\s*(.*?)(?:\n|$)', result)
     domain_match = re.search(r'Domain:\s*(.*?)(?:\n|$)', result)
+    seniority_match = re.search(r'Seniority:\s*(.*?)(?:\n|$)', result)
     
     industry = industry_match.group(1).strip() if industry_match else "Unknown"
     domain = domain_match.group(1).strip() if domain_match else "Unknown"
