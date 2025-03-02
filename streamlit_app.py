@@ -39,6 +39,7 @@ Analyze the following job description for a role at {company_name} and extract:
 1. The specific industry (e.g., Retail, Healthcare, Technology)
 2. The specific domain within that industry (e.g., Data Science in Technology, Supply Chain in Retail)
 3. Consider the company's {company_name} specialization and focus areas when determining the industry and domain.
+4. Determine the seniority level of the role (Entry-level, Mid-level, Senior, Executive)
 
 Focus on the job requirements, responsibilities, and company information. Ignore general information like DEI statements, benefits, and other standard corporate language that doesn't help determine the specific industry and domain.
 
@@ -47,6 +48,7 @@ If provided, use information about {company_name} to refine your analysis.
 Format your response exactly like this:
 Industry: [Industry Name]
 Domain: [Domain Name]
+Seniority: [Seniority Level]
 
 Job Description:
 {job_description}
@@ -54,7 +56,7 @@ Job Description:
 
 # Define the prompt for project generation
 project_generation_template = """
-You are an industry expert with deep knowledge of {industry} and specifically {domain}. The job is at {company_name}.
+You are an industry expert with deep knowledge of {industry} and specifically {domain}. The job is at {company_name} and the seniority level is {seniority}.
 
 Generate 3 impressive and highly specific professional projects that someone could list on their resume to demonstrate relevant experience for a role in {domain} within the {industry} industry, considering the company profile of {company_name}.
 
@@ -91,7 +93,7 @@ Your response must be formatted in Markdown EXACTLY as follows:
 * [Specific action/methodology with domain-specific details with **key terms bolded**]
 * [Specific action/methodology with domain-specific details with **key terms bolded**]
 
-CRITICAL: Ensure that each bullet point is on its own separate line with a proper markdown asterisk (*) at the beginning of each line. Do NOT use the bullet character (•).
+CRITICAL: Ensure that each bullet point is on its own separate line with a proper markdown asterisk (*) at the beginning of each line.
 """
 
 # Initialize prompt templates
