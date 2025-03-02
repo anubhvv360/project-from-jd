@@ -206,21 +206,24 @@ if st.button("Generate Resume Projects") and job_description:
             st.session_state.tokens_consumed += (query_tokens + response_tokens)
 
 # Download button for the results
-if 'projects' in locals():
-    result_text = f"""
-# Resume Projects for {company_name}
+ if 'projects' in locals():
+result_text = f"""
+RESUME PROJECTS FOR {company_name}
 
-**Industry:** {industry}
-**Domain:** {domain}
+INDUSTRY: {industry}
+DOMAIN: {domain}
+SENIORITY LEVEL: {seniority}
 
+# SUGGESTED PROJECTS
 {projects}
-    """
-    st.download_button(
-        label="Download Results",
-        data=result_text,
-        file_name=f"resume_projects_{company_name.replace(' ', '_')}.md",
-        mime="text/markdown",
-    )
+
+"""
+st.download_button(
+label="Download Results",
+data=result_text,
+file_name=f"resume_projects_{company_name.replace(' ', '_')}.txt",
+mime="text/plain",
+)
 
 # Display token usage in sidebar
 st.sidebar.title("Usage Statistics")
