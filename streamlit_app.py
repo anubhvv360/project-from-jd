@@ -11,6 +11,8 @@ from langchain.docstore.document import Document
 import google.generativeai as genai
 import re
 
+st.set_page_config(page_title="Resume Project Generator from Job Descriptions", page_icon="📄", layout="wide")
+
 # Initialize token counting
 if 'tokens_consumed' not in st.session_state:
     st.session_state.tokens_consumed = 0
@@ -137,7 +139,7 @@ def generate_projects(industry, domain, job_description, company_name, seniority
 
 # Set the page title and configuration
 st.set_page_config(
-    page_title="Resume Project Generator",
+    page_title="📄 Resume Project Generator",
     layout="wide",
     initial_sidebar_state="expanded"
 )
