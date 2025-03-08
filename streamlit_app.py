@@ -4,7 +4,7 @@
 import streamlit as st
 # Set the page title and configuration
 st.set_page_config(
-    page_title="📄 Resume Project Generator",
+    page_title="Resume Project Generator",
     layout="wide",
     page_icon="📄",
     initial_sidebar_state="expanded"
@@ -144,7 +144,7 @@ def generate_projects(industry, domain, job_description, company_name, seniority
     return projects
 
 # Main application
-st.title("Resume Project Generator from Job Descriptions")
+st.title("📄 Resume Project Generator from Job Descriptions")
 st.markdown("""
 This tool analyzes job descriptions and generates tailored project ideas for your resume. 
 Simply paste a job description, enter the company name, and get suggested industry-specific projects that showcase your expertise.
