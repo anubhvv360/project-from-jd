@@ -2,7 +2,14 @@
 # coding: utf-8
 
 import streamlit as st
-st.set_page_config(page_title="Resume Project Generator from Job Descriptions", page_icon="📄", layout="wide")
+# Set the page title and configuration
+st.set_page_config(
+    page_title="📄 Resume Project Generator",
+    layout="wide",
+    page_icon="📄",
+    initial_sidebar_state="expanded"
+)
+
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
@@ -135,13 +142,6 @@ def generate_projects(industry, domain, job_description, company_name, seniority
         seniority=seniority
     )
     return projects
-
-# Set the page title and configuration
-st.set_page_config(
-    page_title="📄 Resume Project Generator",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # Main application
 st.title("Resume Project Generator from Job Descriptions")
