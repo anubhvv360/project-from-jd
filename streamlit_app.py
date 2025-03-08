@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os
 import streamlit as st
+st.set_page_config(page_title="Resume Project Generator from Job Descriptions", page_icon="📄", layout="wide")
+import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
@@ -10,8 +11,6 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.docstore.document import Document
 import google.generativeai as genai
 import re
-
-st.set_page_config(page_title="Resume Project Generator from Job Descriptions", page_icon="📄", layout="wide")
 
 # Initialize token counting
 if 'tokens_consumed' not in st.session_state:
